@@ -6,31 +6,38 @@ import os
 
 def read_data(filename):
     """Read in CSV files from the data folder."""
-    pd.read_csv(os.path.join(
-        os.path.dirname(__file__), "..", "data", filename))
+    return pd.read_csv(os.path.join(
+        os.path.dirname(__file__), "..", "data", filename
+        ))
 
 
 class_list = read_data("students.csv")
 submissions = read_data("submissions.csv")
-git_names = read_data("submissions.csv")
+git_names = read_data("gitnames.csv")
 
 # Create a mapping from Imperial usernames to GitHub names.
 name_map = {imperial: git
-            for imperial, git in zip(git_names["ImperialID", "GitHubID"])}
+            for imperial, git in zip(git_names["ImperialID"], git_names["GitHubID"])}
 
 # Map GitHub names to submission times.
 submissions_map = {
-    git: time for git, time in zip(git_names["User", "SubmissionTime"])
+    git: time for git, time in zip(submissions["User"], submissions["SubmissionTime"])
 }
 
+class_list["Username"] = class_list["Username"].str.lower().map(name_map)
 # For each student in the class, find their submission time.
-submission_times = [submissions_map[name_map[id]]
-                    for id in class_list["Username"]]
+submission_times = class_list["Username"].map(submissions_map)
 submission_times = pd.Series(submission_times, name="SubmissionTimes")
 
-report = pd.DataFrame([class_list["Firstname"],
-                       class_list["Surname"],
-                       class_list["Username"],
-                       submission_times])
+dict_report = {
+    "FirstName": class_list["FirstName"],
+    "Surname": class_list["Surname"],
+    "Username": class_list["Username"],
+    "SubmissionTimes": submission_times
+}
+
+report = pd.DataFrame(dict_report)
+
+report.to_csv("report.csv", index=False)
 
 print("Report complete.")
