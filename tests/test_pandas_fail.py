@@ -6,6 +6,6 @@ def test_pandas_fail():
     data = pd.read_csv(os.path.join(os.path.dirname(__file__),
                        "..", "data", "students.csv"))
 
-    usernames = data["UIDs"]
+    usernames = data["Username"]
 
-    assert "LB818" in usernames
+    assert "LB818" in list(usernames)
